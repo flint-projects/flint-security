@@ -1,0 +1,47 @@
+Flint
+Copyright 2026 Steven Buglione
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+Third-party native components keep their own licences; their notices are
+recorded with each provider in policy/native-lock.json and shipped by
+`flint package --sbom`.
+
+Flint ports the public APIs of Spring and related open-source projects to D
+(ADR-030). Ported files keep their upstream headers and are marked
+"Modified by the Flint authors". The upstream projects, their licences and
+how Flint uses each are listed in policy/upstream-licences.json.
+
+Spring Framework
+Copyright 2002-present the original author or authors.
+This product includes software developed by the Spring project
+(https://spring.io/), licensed under the Apache License, Version 2.0.
+
+Spring Boot
+Copyright 2012-present the original author or authors.
+Licensed under the Apache License, Version 2.0.
+
+Spring, Spring Framework and Spring Boot are trademarks of Broadcom Inc.
+and/or its subsidiaries. Flint is not affiliated with or endorsed by Broadcom.
+
+D runtime (druntime) garbage collector
+Copyright: D Language Foundation 2001 - 2021.
+Authors: Walter Bright, David Friedman, Sean Kelly, and the D runtime contributors.
+Licensed under the Boost Software License, Version 1.0
+(http://www.boost.org/LICENSE_1_0.txt). Flint's collector in
+flint.arena.sys.gc is ported from it and modified by the Flint authors.
+
+Boehm-Demers-Weiser garbage collector (bdwgc)
+Copyright 1988, 1989 Hans-J. Boehm, Alan J. Demers
+Copyright (c) 1991-1995 by Xerox Corporation.  All rights reserved.
+Copyright (c) 1996-1999 by Silicon Graphics.  All rights reserved.
+Copyright (c) 1999 by Hewlett-Packard Company.  All rights reserved.
+Copyright (c) 2008-2021 Ivan Maidanski
+THIS MATERIAL IS PROVIDED AS IS, WITH ABSOLUTELY NO WARRANTY EXPRESSED
+OR IMPLIED.  ANY USE IS AT YOUR OWN RISK.
+Permission is hereby granted to use or copy this program for any purpose,
+provided the above notices are retained on all copies. Permission to modify
+the code and to distribute modified code is granted, provided the above
+notices are retained, and a notice that the code was modified is included
+with the above copyright notice. Flint's soft-dirty page tracking in
+flint.arena.sys.gc is ported from bdwgc's os_dep.c and modified by the
+Flint authors.

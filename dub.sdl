@@ -1,0 +1,10 @@
+// flint-projects/flint-security: the security repo of Flint. Its packages keep the flint:* names; build them in a
+// workspace with the repos they depend on (python3 tools/workspace.py dub-root, in the flint repo).
+name "flint"
+description "Flint security (integrated repo)"
+license "Apache-2.0"
+targetType "none"
+subPackage "flint-security-config"
+subPackage "flint-security-core"
+subPackage "flint-security-crypto"
+subPackage "flint-security-web"
