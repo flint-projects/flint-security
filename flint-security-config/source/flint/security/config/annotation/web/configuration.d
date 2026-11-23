@@ -27,7 +27,7 @@ import flint.security.web : FilterChainProxy, SecurityFilterChain;
 @safe:
 
 /// Provides the prototype `HttpSecurity` with Spring's defaults (Spring Security's `HttpSecurityConfiguration`).
-@Configuration(proxyBeanMethods : false)
+@Configuration(proxyBeanMethods: false)
 class HttpSecurityConfiguration
 {
     /// A new `HttpSecurity` for each `SecurityFilterChain` bean, sharing the global authentication manager.
@@ -41,7 +41,7 @@ class HttpSecurityConfiguration
 
 /// Exports `springSecurityFilterChain`, the `FilterChainProxy` over the `SecurityFilterChain` beans (Spring
 /// Security's `WebSecurityConfiguration`).
-@Configuration(proxyBeanMethods : false)
+@Configuration(proxyBeanMethods: false)
 class WebSecurityConfiguration
 {
     /// The bean name Boot registers as the servlet filter.

@@ -21,7 +21,7 @@ import flint.security.authorization.method : PreAuthorizeMethodInterceptor;
 @safe:
 
 /// Registers the `@PreAuthorize` advisor (Spring Security's `PrePostMethodSecurityConfiguration`).
-@Configuration(proxyBeanMethods : false)
+@Configuration(proxyBeanMethods: false)
 class PrePostMethodSecurityConfiguration
 {
     /// The advisor that authorizes `@PreAuthorize` methods before they run.
