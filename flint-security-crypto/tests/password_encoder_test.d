@@ -28,6 +28,7 @@ BCryptPasswordEncoderTests: the strength and format checks; hashing needs the pi
 module flint.security.crypto.password_encoder_test;
 
 import flint.java.lang : IllegalArgumentException, UnsupportedOperationException;
+import flint.engine.security.bcrypt : bcryptAvailable;
 import flint.security.crypto.bcrypt : BCryptBackend, BCrypt, BCryptPasswordEncoder;
 import flint.security.crypto.password : DelegatingPasswordEncoder, NoOpPasswordEncoder, PasswordEncoder;
 import std.exception : collectException;
@@ -209,7 +210,8 @@ unittest
     auto encoder = new BCryptPasswordEncoder;
     assert(!encoder.matches("password", "012345678901234567890123456789"));
     enum hashed = "$2a$10$ymaklWBnpBKlgdMgkjWVF.GMGyvH8aDuTK.glFOaKw712LHtRRymS";
-    assert(collectException!UnsupportedOperationException(encoder.matches("password", hashed)) !is null);
+    if (!bcryptAvailable())
+        assert(collectException!UnsupportedOperationException(encoder.matches("password", hashed)) !is null);
     assert(!encoder.upgradeEncoding(hashed) && new BCryptPasswordEncoder(11).upgradeEncoding(hashed));
     assert(collectException!IllegalArgumentException(encoder.upgradeEncoding("not-bcrypt")) !is null);
     BCrypt.install(new StubBCrypt);
@@ -217,4 +219,68 @@ unittest
         BCrypt.install(null);
     assert(encoder.matches("password", hashed) && !encoder.matches("wrong", hashed));
     assert(encoder.matches("password", encoder.encode("password")));
+}
+
+// BCryptPasswordEncoderTests over the pinned crypt_blowfish provider; they run where it is linked.
+
+private alias Version = BCryptPasswordEncoder.BCryptVersion;
+
+unittest
+{
+    if (!bcryptAvailable())
+        return;
+    foreach (version_; [Version._2A, Version._2Y, Version._2B])
+    {
+        // $2yMatches, $2aMatches, $2bMatches; ...NotMatches; ...Unicode; ...CustomStrength
+        auto encoder = new BCryptPasswordEncoder(version_, 4);
+        const result = encoder.encode("password");
+        assert(result != "password" && result[0 .. 3] == version_ && result[4 .. 6] == "04");
+        assert(encoder.matches("password", result) && !encoder.matches("bogus", result));
+        assert(!encoder.matches("", result)); // emptyRawPasswordDoesNotMatchPassword
+        const unicode = encoder.encode("passw\u9292rd");
+        assert(!encoder.matches("pass\u9292\u9292rd", unicode) && encoder.matches("passw\u9292rd", unicode));
+    }
+}
+
+unittest
+{
+    if (!bcryptAvailable())
+        return;
+    // doesntMatchNullEncodedValue, doesntMatchEmptyEncodedValue, doesntMatchBogusEncodedValue
+    auto encoder = new BCryptPasswordEncoder(4);
+    assert(!encoder.matches("password", null) && !encoder.matches("password", ""));
+    assert(!encoder.matches("password", "012345678901234567890123456789"));
+    // upgradeFromLowerStrength
+    auto weak = new BCryptPasswordEncoder(4);
+    auto strong = new BCryptPasswordEncoder(5);
+    const weakPassword = weak.encode("password");
+    const strongPassword = strong.encode("password");
+    assert(!weak.upgradeEncoding(strongPassword) && strong.upgradeEncoding(weakPassword));
+    // upgradeFromNullOrEmpty, upgradeFromNonBCrypt, upgradeWhenNoRoundsThenTrue
+    assert(!encoder.upgradeEncoding(null) && !encoder.upgradeEncoding(""));
+    assert(collectException!IllegalArgumentException(encoder.upgradeEncoding("not-a-bcrypt-password")) !is null);
+    assert(encoder.upgradeEncoding("$2a$00$9N8N35BVs5TLqGL3pspAte5OWWA2a2aZIs.EGp7At7txYakFERMue"));
+    // checkWhenNoRoundsThenTrue: deviation, crypt_blowfish refuses cost 00, so neither password matches.
+    assert(!encoder.matches("password", "$2a$00$9N8N35BVs5TLqGL3pspAte5OWWA2a2aZIs.EGp7At7txYakFERMue"));
+    // petclinic-rest's seeded admin/admin.
+    enum admin = "$2a$10$ymaklWBnpBKlgdMgkjWVF.GMGyvH8aDuTK.glFOaKw712LHtRRymS";
+    assert(new BCryptPasswordEncoder().matches("admin", admin));
+}
+
+unittest
+{
+    if (!bcryptAvailable())
+        return;
+    // encodeWhenPasswordOverMaxLengthThenThrowIllegalArgumentException, matchesWhenPasswordOverMaxLengthThenAllowToMatch
+    auto encoder = new BCryptPasswordEncoder(4);
+    enum password72chars = "123456789012345678901234567890123456789012345678901234567890123456789012";
+    encoder.encode(password72chars);
+    assert(collectException!IllegalArgumentException(encoder.encode(password72chars ~ "3")) !is null);
+    const encoded72 = encoder.encode(password72chars);
+    assert(encoder.matches(password72chars, encoded72) && encoder.matches(password72chars ~ "3", encoded72));
+    // passwordLargerThan72BytesShouldThrowIllegalArgumentException: 70 characters, 72 UTF-8 bytes.
+    const password72Bytes = "\u00e9\u00e9" ~ password72chars[0 .. 68];
+    assert(password72Bytes.length == 72);
+    encoder.encode(password72Bytes);
+    assert(collectException!IllegalArgumentException(encoder.encode(password72Bytes ~ "a")) !is null);
 }

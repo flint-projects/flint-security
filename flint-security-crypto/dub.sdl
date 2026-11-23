@@ -7,6 +7,7 @@ importPaths "source"
 dflags "-preview=dip1000"
 dependency "flint:java" version="*"
 dependency "flint:conc" version="*"
+dependency "flint:engine-security" version="*"
 
 configuration "library" {
     targetType "library"

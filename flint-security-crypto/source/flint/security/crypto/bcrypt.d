@@ -3,9 +3,12 @@
 // Licensed under the Apache License, Version 2.0.
 // Modified by the Flint authors.
 /*
- * BCrypt.java itself is not ported: AGENTS.md forbids a new cryptographic implementation. The hashing comes from a
- * BCryptBackend that a pinned native provider registers (decisions.md, "Open for the owner"); without one, encoding
- * and matching throw UnsupportedOperationException. The encoded-format check and upgradeEncoding are Spring's.
+ * BCrypt.java itself is not ported: AGENTS.md forbids a new cryptographic implementation. The hashing comes from
+ * Openwall's crypt_blowfish, the pinned native provider (owner decision 5), through flint.engine.security.bcrypt;
+ * an application may install another BCryptBackend. Without either, encoding and matching throw
+ * UnsupportedOperationException. The encoded-format check, upgradeEncoding and the 72-byte limit are Spring's.
+ * Deviation: crypt_blowfish refuses costs below 4, so a "$2a$00$" hash never matches (Spring checks it with one
+ * round).
  */
 
 /++
@@ -42,13 +45,78 @@ struct BCrypt
         backendSlot.set(backend);
     }
 
-    /// The backend. Throws `UnsupportedOperationException` when none is registered.
+    /// The backend: the registered one, else crypt_blowfish when it is linked. Throws
+    /// `UnsupportedOperationException` when there is neither.
     static BCryptBackend backend()
     {
+        import flint.engine.security.bcrypt : bcryptAvailable;
+
         auto found = backendSlot.get();
-        if (found is null)
-            throw new UnsupportedOperationException("BCrypt needs a pinned native provider; none is registered");
-        return found;
+        if (found !is null)
+            return found;
+        if (!bcryptAvailable())
+            throw new UnsupportedOperationException("BCrypt needs the pinned crypt-blowfish provider, not linked");
+        auto fallback = defaultSlot.get();
+        if (fallback is null)
+        {
+            fallback = new CryptBlowfishBackend; // stateless: a racing second instance is harmless
+            defaultSlot.set(fallback);
+        }
+        return fallback;
+    }
+}
+
+private shared ProcessSlot!BCryptBackend defaultSlot;
+
+/// The backend over the pinned crypt_blowfish provider (`flint.engine.security.bcrypt`).
+final class CryptBlowfishBackend : BCryptBackend
+{
+    /// `password` with a fresh salt. Throws `IllegalArgumentException` past 72 bytes, as Spring's `BCrypt.hashpw`.
+    string hash(string password, string version_, int strength)
+    {
+        import flint.engine.security.bcrypt : bcryptHash, bcryptSalt;
+
+        if (password.length > 72)
+            throw new IllegalArgumentException("password cannot be more than 72 bytes");
+        if (version_.length != 3 || strength < BCrypt.MIN_LOG_ROUNDS || strength > BCrypt.MAX_LOG_ROUNDS)
+            throw new IllegalArgumentException("Invalid log_rounds");
+        char[30] setting;
+        size_t settingLength;
+        raise(bcryptSalt(version_[2], strength, setting, settingLength));
+        char[61] hashed;
+        size_t length;
+        raise(bcryptHash(cast(const(ubyte)[]) password, setting[0 .. settingLength], hashed, length));
+        return hashed[0 .. length].idup;
+    }
+
+    /// Whether `password` rehashes to `hashed`, compared without an early return; false for a hash the provider
+    /// refuses.
+    bool check(string password, string hashed)
+    {
+        import flint.engine.security.bcrypt : Status;
+        import flint.engine.security.bcrypt : bcryptHash;
+
+        char[61] rehashed;
+        size_t length;
+        const error = bcryptHash(cast(const(ubyte)[]) password, hashed, rehashed, length);
+        if (error.code == Status.unsupported)
+            raise(error);
+        if (error.code != Status.ok || length != hashed.length)
+            return false;
+        ubyte difference;
+        foreach (i, c; hashed)
+            difference |= c ^ rehashed[i];
+        return difference == 0;
+    }
+
+    private static void raise(const imported!"flint.engine.security.bcrypt".Error error)
+    {
+        import flint.engine.security.bcrypt : Status;
+
+        if (error.code == Status.unsupported)
+            throw new UnsupportedOperationException(error.message);
+        if (error.code != Status.ok)
+            throw new IllegalArgumentException(error.message);
     }
 }
 
