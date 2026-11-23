@@ -29,7 +29,8 @@ import flint.security.crypto.password : PasswordEncoder;
 
 /// Exports the global `AuthenticationManagerBuilder` and builds the manager from it (Spring Security's
 /// `AuthenticationConfiguration`).
-@Configuration(proxyBeanMethods : false) class AuthenticationConfiguration
+@Configuration(proxyBeanMethods : false)
+class AuthenticationConfiguration
 {
     private ApplicationContext context;
     private AuthenticationManagerBuilder builder;
@@ -42,7 +43,8 @@ import flint.security.crypto.password : PasswordEncoder;
     }
 
     /// The global builder, configured by `@Autowired configureGlobal(AuthenticationManagerBuilder)` methods.
-    @Bean AuthenticationManagerBuilder authenticationManagerBuilder()
+    @Bean
+    AuthenticationManagerBuilder authenticationManagerBuilder()
     {
         if (builder is null)
             builder = new AuthenticationManagerBuilder(&passwordEncoderBean);

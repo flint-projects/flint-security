@@ -27,10 +27,13 @@ import flint.security.web : FilterChainProxy, SecurityFilterChain;
 @safe:
 
 /// Provides the prototype `HttpSecurity` with Spring's defaults (Spring Security's `HttpSecurityConfiguration`).
-@Configuration(proxyBeanMethods : false) class HttpSecurityConfiguration
+@Configuration(proxyBeanMethods : false)
+class HttpSecurityConfiguration
 {
     /// A new `HttpSecurity` for each `SecurityFilterChain` bean, sharing the global authentication manager.
-    @Bean @Scope("prototype") HttpSecurity httpSecurity(AuthenticationConfiguration authenticationConfiguration)
+    @Bean
+    @Scope("prototype")
+    HttpSecurity httpSecurity(AuthenticationConfiguration authenticationConfiguration)
     {
         return new HttpSecurity(new LazyAuthenticationManager(&authenticationConfiguration.getAuthenticationManager));
     }
@@ -38,14 +41,15 @@ import flint.security.web : FilterChainProxy, SecurityFilterChain;
 
 /// Exports `springSecurityFilterChain`, the `FilterChainProxy` over the `SecurityFilterChain` beans (Spring
 /// Security's `WebSecurityConfiguration`).
-@Configuration(proxyBeanMethods : false) class WebSecurityConfiguration
+@Configuration(proxyBeanMethods : false)
+class WebSecurityConfiguration
 {
     /// The bean name Boot registers as the servlet filter.
     enum DEFAULT_FILTER_NAME = "springSecurityFilterChain";
 
     /// The proxy over `securityFilterChains`; without any, a default chain from `http`.
-    @Bean(["springSecurityFilterChain"]) Filter springSecurityFilterChain(
-            SecurityFilterChain[] securityFilterChains, HttpSecurity http)
+    @Bean(["springSecurityFilterChain"])
+    Filter springSecurityFilterChain(SecurityFilterChain[] securityFilterChains, HttpSecurity http)
     {
         if (securityFilterChains.length == 0)
             securityFilterChains = [defaultChain(http)];
