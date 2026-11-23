@@ -1,0 +1,26 @@
+name "security-config"
+description "Spring Security's spring-security-config for Flint: HttpSecurity, @EnableWebSecurity, @EnableMethodSecurity"
+license "Apache-2.0"
+targetType "library"
+sourcePaths "source"
+importPaths "source"
+dflags "-preview=dip1000"
+dependency "flint:engine-aot" version="*"
+dependency "flint:java" version="*"
+dependency "flint:core" version="*"
+dependency "flint:beans" version="*"
+dependency "flint:context" version="*"
+dependency "flint:jakarta-servlet" version="*"
+dependency "flint:security-crypto" version="*"
+dependency "flint:security-core" version="*"
+dependency "flint:security-web" version="*"
+
+configuration "library" {
+    targetType "library"
+}
+configuration "unittest" {
+    targetType "library"
+    dependency "flint:framework-test" version="*"
+    sourcePaths "source" "tests"
+    importPaths "source" "tests"
+}

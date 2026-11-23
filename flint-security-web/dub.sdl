@@ -1,0 +1,21 @@
+name "security-web"
+description "Spring Security's spring-security-web for Flint: the servlet filter chain"
+license "Apache-2.0"
+targetType "library"
+sourcePaths "source"
+importPaths "source"
+dflags "-preview=dip1000"
+dependency "flint:engine-aot" version="*"
+dependency "flint:java" version="*"
+dependency "flint:jakarta-servlet" version="*"
+dependency "flint:security-core" version="*"
+
+configuration "library" {
+    targetType "library"
+}
+configuration "unittest" {
+    targetType "library"
+    dependency "flint:framework-test" version="*"
+    sourcePaths "source" "tests"
+    importPaths "source" "tests"
+}

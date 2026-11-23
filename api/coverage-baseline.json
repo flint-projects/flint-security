@@ -1,13 +1,13 @@
 {"schema":"flint.api-coverage-baseline/1",
-"unclassified":10554,
+"unclassified":5634,
 "upstreams":{
-"spring-security@7.2.0":{"unclassified":10554,"modules":{
+"spring-security@7.2.0":{"unclassified":5634,"modules":{
 "access":449,
 "acl":298,
 "cas":158,
-"config":1329,
-"core":1535,
-"crypto":263,
+"config":0,
+"core":0,
+"crypto":0,
 "data":11,
 "kerberos-client":25,
 "kerberos-core":86,
@@ -24,7 +24,7 @@
 "saml2-service-provider":488,
 "taglibs":0,
 "test":160,
-"web":1793,
+"web":0,
 "webauthn":453
 }}
 }}

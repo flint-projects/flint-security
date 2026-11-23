@@ -1,0 +1,24 @@
+name "security-core"
+description "Spring Security's spring-security-core for Flint: authentication, the security context, user details, method security"
+license "Apache-2.0"
+targetType "library"
+sourcePaths "source"
+importPaths "source"
+dflags "-preview=dip1000"
+dependency "flint:engine-aot" version="*"
+dependency "flint:engine-reactor" version="*"
+dependency "flint:java" version="*"
+dependency "flint:core" version="*"
+dependency "flint:beans" version="*"
+dependency "flint:context" version="*"
+dependency "flint:jdbc" version="*"
+dependency "flint:security-crypto" version="*"
+
+configuration "library" {
+    targetType "library"
+}
+configuration "unittest" {
+    targetType "library"
+    sourcePaths "source" "tests"
+    importPaths "source" "tests"
+}
