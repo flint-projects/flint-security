@@ -1,0 +1,8 @@
+name "probe-security-core"
+targetType "executable"
+sourcePaths "source"
+importPaths "source"
+targetPath "build"
+targetName "probe-security-core"
+dflags "-preview=dip1000"
+dependency "flint:security-core" path="../../.."

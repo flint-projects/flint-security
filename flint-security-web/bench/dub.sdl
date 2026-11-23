@@ -1,0 +1,8 @@
+name "probe-security-web"
+targetType "executable"
+sourcePaths "source"
+importPaths "source"
+targetPath "build"
+targetName "probe-security-web"
+dflags "-preview=dip1000"
+dependency "flint:security-web" path="../../.."
